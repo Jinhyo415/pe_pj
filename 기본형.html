@@ -28,7 +28,7 @@
             --font-title: 'Gowun Batang', serif;
             --font-body: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
             
-            /* 신호등 색상 */
+            /* 신호등 및 상태 색상 */
             --status-green: #81B29A;
             --status-yellow: #F2CC8F;
             --status-red: #E07A5F;
@@ -200,6 +200,7 @@
         .btn-secondary:hover { background-color: var(--color-line); }
         .btn-danger { background-color: transparent; color: var(--color-main); border: 1px solid var(--color-main); }
         .btn-danger:hover { background-color: var(--color-main); color: #fff; }
+        .btn-small { padding: 6px 14px; font-size: 0.85rem; min-height: 32px; }
 
         .input-field {
             width: 100%; padding: 12px 14px; border: 1px solid var(--color-input-border);
@@ -215,19 +216,77 @@
         .hero-img-wrap { max-width: 700px; margin: 40px auto; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
         .img-fluid { width: 100%; height: auto; object-fit: cover; border-radius: 12px; display: block; filter: var(--img-filter); }
 
-        /* --- Goal Dashboard --- */
+        /* --- 업그레이드된 Goal Dashboard --- */
         .goal-dashboard { background: var(--color-card-bg); border-radius: 12px; padding: 32px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); text-align: left; }
         .goal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 12px; }
         .goal-header h3 { font-family: var(--font-title); font-size: 1.4rem; color: var(--color-point); }
-        .goal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
-        .goal-card { background: var(--color-card-sub-bg); padding: 20px; border-radius: 8px; border-left: 4px solid var(--color-main); position: relative; }
-        .goal-title-wrap { display: flex; justify-content: space-between; align-items: flex-start; font-weight: 600; gap: 8px; }
-        .progress-bar-bg { background: var(--color-line); height: 8px; border-radius: 4px; overflow: hidden; margin-top: 12px; }
-        .progress-bar-fill { background: var(--color-point); height: 100%; width: 0%; transition: width 0.8s ease; }
-        .goal-delete-btn { position: absolute; top: 12px; right: 12px; background: none; border: none; color: var(--color-text-muted); cursor: pointer; opacity: 0.6; }
-        .goal-delete-btn:hover { color: var(--color-main); opacity: 1; }
+        
+        .goal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; }
+        .goal-card { 
+            background: var(--color-card-sub-bg); padding: 24px; border-radius: 8px; 
+            border-left: 5px solid var(--color-main); position: relative; 
+            display: flex; flex-direction: column; gap: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+        /* 완료된 목표 스타일 */
+        .goal-card.status-completed {
+            border-left-color: var(--status-green);
+            opacity: 0.85;
+        }
+        .goal-card.status-completed .goal-title {
+            text-decoration: line-through;
+            color: var(--color-text-muted);
+        }
+        /* 잠시 멈춤 목표 스타일 */
+        .goal-card.status-paused {
+            border-left-color: var(--status-yellow);
+        }
+
+        .goal-meta-top { display: flex; justify-content: space-between; align-items: center; }
+        .goal-badge-wrap { display: flex; gap: 6px; }
+        .goal-badge { padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; color: #fff; }
+        .badge-cat { background-color: var(--color-point); }
+        .badge-status { background-color: var(--status-none); color: var(--color-text); }
+        .badge-status.status-active { background-color: var(--color-main); color: #fff; }
+        .badge-status.status-paused { background-color: var(--status-yellow); color: #2F3E46; }
+        .badge-status.status-completed { background-color: var(--status-green); color: #fff; }
+
+        .goal-dday { font-size: 0.85rem; font-weight: 700; color: var(--color-text-muted); }
+        .goal-dday.urgent { color: var(--status-red); }
+        .goal-dday.overdue { color: #bbbbbb; text-decoration: line-through; }
+
+        .goal-title { font-size: 1.2rem; font-weight: 700; color: var(--color-text); font-family: var(--font-title); }
+        
+        .goal-next-action { 
+            background: var(--color-card-bg); padding: 10px 14px; border-radius: 6px; 
+            font-size: 0.88rem; border: 1px dashed var(--color-input-border);
+        }
+        .goal-next-action strong { color: var(--color-main); }
+
+        /* 체크포인트 리스트 */
+        .goal-checkpoints-box { display: flex; flex-direction: column; gap: 8px; }
+        .goal-checkpoints-title { font-size: 0.85rem; font-weight: 700; color: var(--color-point); }
+        .goal-chk-item { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }
+        .goal-chk-item input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: var(--color-main); }
+        .goal-chk-item.checked span { text-decoration: line-through; color: var(--color-text-muted); }
+
+        .goal-progress-wrap { margin-top: 4px; }
+        .goal-progress-text { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
+
+        /* 상단 액션 컨트롤 버튼들 */
+        .goal-card-controls { position: absolute; top: 16px; right: 16px; display: flex; gap: 6px; }
+        .goal-ctrl-btn { background: none; border: none; color: var(--color-text-muted); cursor: pointer; font-size: 0.9rem; padding: 2px; }
+        .goal-ctrl-btn:hover { color: var(--color-main); }
+
+        /* 목표 생성/편집 폼 */
         .goal-form-container { margin-top: 24px; padding-top: 24px; border-top: 1px dashed var(--color-line); display: none; }
-        .goal-form-inputs { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 12px; align-items: center; }
+        .goal-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px; }
+        .checkpoint-form-section { background: var(--color-card-sub-bg); padding: 16px; border-radius: 8px; margin-bottom: 16px; border: 1px solid var(--color-border); }
+        .checkpoint-input-row { display: flex; gap: 8px; margin-bottom: 10px; }
+        .checkpoint-list-display { display: flex; flex-direction: column; gap: 6px; max-height: 150px; overflow-y: auto; }
+        .checkpoint-added-item { display: flex; justify-content: space-between; align-items: center; background: var(--color-card-bg); padding: 6px 12px; border-radius: 4px; font-size: 0.85rem; border: 1px solid var(--color-line); }
+
+        .goal-empty-state { text-align: center; padding: 40px 20px; color: var(--color-text-muted); font-style: italic; border: 1px dashed var(--color-input-border); border-radius: 8px; }
 
         /* --- Today's Focus --- */
         .focus-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; margin-bottom: 32px; }
@@ -245,13 +304,12 @@
         .focus-edit-form-wrap { background: var(--color-card-bg); padding: 32px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); display: none; }
         .focus-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 24px; }
 
-        /* --- Growth Calendar (1~31일 고정식 레이아웃) --- */
+        /* --- Growth Calendar --- */
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; background: var(--color-card-bg); padding: 24px; border-radius: 12px; }
         .calendar-day { aspect-ratio: 1; border-radius: 8px; background-color: var(--status-none); position: relative; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; padding: 8px; border: 3px solid transparent; }
         .calendar-day .day-num { font-size: 0.9rem; font-weight: 700; color: rgba(0, 0, 0, 0.5); }
         :root[data-theme="dark"] .calendar-day .day-num { color: rgba(255, 255, 255, 0.6); }
         
-        /* 오늘 날짜에만 굵은 테두리 적용 */
         .calendar-day.today { border-color: var(--color-text); box-shadow: 0 0 12px rgba(0,0,0,0.15); }
         .calendar-day:hover { transform: scale(1.05); z-index: 5; }
         .calendar-day:hover::after {
@@ -274,7 +332,7 @@
         .summary-item h4 { font-size: 0.95rem; color: rgba(255, 255, 255, 0.8); margin-bottom: 8px; }
         .summary-item .num { font-family: var(--font-title); font-size: 2.2rem; font-weight: 700; }
 
-        /* --- Growth Log (성장 일지 양방향 폼) --- */
+        /* --- Growth Log --- */
         .log-layout { display: grid; grid-template-columns: 1.2fr 2fr; gap: 40px; }
         .log-form-card { background: var(--color-card-bg); padding: 28px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border-top: 3px solid var(--color-point); }
         .log-form-card h3 { font-family: var(--font-title); color: var(--color-point); margin-bottom: 20px; font-size: 1.3rem; }
@@ -307,14 +365,14 @@
         .guestbook-del-btn:hover { opacity: 1; color: var(--color-main); }
         .guestbook-empty { text-align: center; padding: 40px 20px; color: var(--color-text-muted); font-style: italic; border: 1px dashed var(--color-input-border); border-radius: 12px; }
 
-        /* --- Toast 알림 인프라 --- */
+        /* --- Toast 알림 --- */
         #toast-container { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 2000; pointer-events: none; }
         .toast { background: var(--color-point); color: #ffffff; padding: 12px 24px; border-radius: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); font-size: 0.9rem; font-weight: 500; animation: toastFadeInOut 2.3s ease forwards; }
 
-        /* --- 과거 데이터 정밀 수정용 공통 팝업 모달 --- */
+        /* --- 모달 팝업 --- */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 3000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal-card { background: var(--color-card-bg); padding: 32px; border-radius: 12px; max-width: 500px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: fadeInUp 0.3s ease-out; }
+        .modal-card { background: var(--color-card-bg); padding: 32px; border-radius: 12px; max-width: 500px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: fadeInUp 0.3s ease-out; max-height: 90vh; overflow-y: auto; }
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.95rem; }
 
@@ -331,9 +389,19 @@
             .section-header-wrap { flex-direction: column; align-items: stretch; margin-bottom: 28px; }
             .section-action-btns { width: 100%; flex-direction: column; gap: 8px; margin-top: 12px; }
             .section-action-btns .btn { width: 100%; text-align: center; }
-            .goal-form-inputs { grid-template-columns: 1fr; gap: 10px; }
+            
+            .goal-grid { grid-template-columns: 1fr; }
+            .goal-form-grid { grid-template-columns: 1fr; }
+            .checkpoint-input-row { flex-direction: column; }
+            .checkpoint-input-row .btn { width: 100%; }
+
             .focus-form-grid, .log-layout, .guestbook-layout { grid-template-columns: 1fr; gap: 24px; }
             .calendar-grid { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+            
+            /* 모바일 터치 타겟 최적화 */
+            .goal-chk-item { padding: 8px 0; }
+            .goal-chk-item input[type="checkbox"] { width: 24px; height: 24px; }
+            .goal-ctrl-btn { font-size: 1.2rem; padding: 6px; }
         }
         @media (max-width: 380px) {
             .calendar-grid { grid-template-columns: repeat(3, 1fr); }
@@ -370,17 +438,62 @@
             
             <div class="goal-dashboard">
                 <div class="goal-header">
-                    <h3>🎯 현재 진행 중인 목표</h3>
-                    <button class="btn" style="padding: 6px 14px; font-size: 0.85rem;" onclick="toggleGoalForm()">목표 편집/추가</button>
+                    <h3>🎯 현재 진행 중인 목표 마일스톤</h3>
+                    <button class="btn btn-small" id="btnToggleGoalForm" onclick="openNewGoalForm()">목표 추가하기</button>
                 </div>
+                
                 <div class="goal-form-container" id="goalFormContainer">
-                    <div class="goal-form-inputs">
-                        <input type="text" id="goalName" class="input-field" placeholder="목표 명칭">
-                        <input type="number" id="goalCurrent" class="input-field" placeholder="현재 수치">
-                        <input type="number" id="goalTarget" class="input-field" placeholder="목표 수치">
-                        <button class="btn" onclick="addGoal()">추가</button>
+                    <input type="hidden" id="formGoalId" value="">
+                    <h4 id="formTitle" style="font-size: 1.1rem; color: var(--color-point); margin-bottom: 14px;">✨ 새 목표 작성</h4>
+                    <div class="goal-form-grid">
+                        <div class="form-group">
+                            <label for="goalName">목표 명칭</label>
+                            <input type="text" id="goalName" class="input-field" placeholder="예: 바닐라 JS 알고리즘 정복">
+                        </div>
+                        <div class="form-group">
+                            <label for="goalCategory">분야 / 카테고리</label>
+                            <input type="text" id="goalCategory" class="input-field" placeholder="예: 개발, 독서, 자격증">
+                        </div>
+                        <div class="form-group">
+                            <label for="goalDeadline">마감일 선택</label>
+                            <input type="date" id="goalDeadline" class="input-field">
+                        </div>
+                        <div class="form-group">
+                            <label for="goalStatus">목표 상태</label>
+                            <select id="goalStatus" class="input-field">
+                                <option value="active">진행 중</option>
+                                <option value="paused">잠시 멈춤</option>
+                                <option value="completed">완료</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="goalNextAction">지금 해야 할 '다음 행동'</label>
+                        <input type="text" id="goalNextAction" class="input-field" placeholder="가장 먼저 실행할 구체적 액션 하나">
+                    </div>
+
+                    <div class="checkpoint-form-section">
+                        <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.9rem;">📋 단계별 체크포인트 구성</label>
+                        <p style="font-size:0.8rem; color:var(--color-text-muted); margin-bottom:10px;">체크포인트를 생성하면 달성률이 자동 계산됩니다. 비워둘 경우 직접 진행률을 설정할 수 있습니다.</p>
+                        <div class="checkpoint-input-row">
+                            <input type="text" id="chkInputText" class="input-field" placeholder="체크포인트 행동 기술" style="min-height:38px;">
+                            <button class="btn btn-secondary" onclick="addCheckpointToFormList()" style="min-height:38px; padding:0 16px;">생성</button>
+                        </div>
+                        <div class="checkpoint-list-display" id="formCheckpointList"></div>
+                    </div>
+
+                    <div class="form-group" id="manualPercentGroup">
+                        <label for="goalManualProgress">수동 진행률 입력 (%) <span style="font-size:0.8rem; font-weight:normal; color:var(--color-text-muted);">(체크포인트가 없을 때 적용)</span></label>
+                        <input type="number" id="goalManualProgress" class="input-field" min="0" max="100" placeholder="0 ~ 100">
+                    </div>
+
+                    <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px;">
+                        <button class="btn btn-secondary btn-small" onclick="closeGoalForm()">닫기</button>
+                        <button class="btn btn-small" id="formSubmitBtn" onclick="submitGoalForm()">저장하기</button>
                     </div>
                 </div>
+
                 <div class="goal-grid" id="goalGrid"></div>
             </div>
         </div>
@@ -624,14 +737,40 @@
 
         // 오늘 날짜 상숫값 바인딩 (13일 고정)
         const TODAY_DAY = 13;
+        const TODAY_FULL_DATE = new Date("2026-07-13");
 
         let G_State = { goals: [], calendar: {}, guestbook: [], logs: [] };
+        
+        // 추가/수정용 폼 임시 체크포인트 배열
+        let tempCheckpoints = [];
 
         function loadStorage() {
             try {
-                G_State.goals = JSON.parse(localStorage.getItem('archive_goals')) || [
-                    { id: 1, title: '알고리즘 문제 풀이', current: 45, target: 100 },
-                    { id: 2, title: '독서 스터디 (딥 워크)', current: 3, target: 5 }
+                G_State.goals = JSON.parse(localStorage.getItem('archive_goals_v2')) || [
+                    { 
+                        id: 1, 
+                        title: '알고리즘 코테 마스터', 
+                        category: '개발', 
+                        deadline: '2026-08-15', 
+                        nextAction: '매일 아침 프로그래머스 2문제 풀이',
+                        status: 'active',
+                        checkpoints: [
+                            { text: '기초 정렬/탐색 문제집 풀이', checked: true },
+                            { text: 'DP 및 그래프 백트래킹 정복', checked: false },
+                            { text: '실전 모의고사 3회 이상 응시', checked: false }
+                        ],
+                        manualProgress: 0
+                    },
+                    {
+                        id: 2,
+                        title: '독서 스터디 (딥 워크)',
+                        category: '독서',
+                        deadline: '2026-07-20',
+                        nextAction: '3장 내용 요약 및 서평 초안 작성',
+                        status: 'paused',
+                        checkpoints: [],
+                        manualProgress: 40
+                    }
                 ];
                 G_State.calendar = JSON.parse(localStorage.getItem('archive_calendar')) || {};
                 G_State.guestbook = JSON.parse(localStorage.getItem('archive_guestbook')) || [
@@ -641,7 +780,6 @@
                     { id: 1, date: '2026-07-12', title: '바닐라 자바스크립트로 파티클 엔진 고도화', content: '브라우저 렌더링 파이프라인 최적화를 진행했다. RequestAnimationFrame 구조를 정합성 있게 변경하여 프레임 드랍 현상을 극적으로 개선 완료함.', tag: '개발 및 연구' }
                 ];
 
-                // 오늘 날짜 상태 데이터 백킹
                 if (!G_State.calendar[TODAY_DAY]) {
                     G_State.calendar[TODAY_DAY] = { status: 'none', targetHours: 0, actualHours: 0, percent: 0, oneLine: '' };
                 }
@@ -651,7 +789,7 @@
         }
 
         function initDefaultStorage() {
-            G_State.goals = [{ id: 1, title: '알고리즘 문제 풀이', current: 45, target: 100 }];
+            G_State.goals = [];
             G_State.calendar = {};
             G_State.calendar[TODAY_DAY] = { status: 'none', targetHours: 0, actualHours: 0, percent: 0, oneLine: '' };
             G_State.guestbook = [];
@@ -660,7 +798,7 @@
         }
 
         function saveAllToStorage() {
-            localStorage.setItem('archive_goals', JSON.stringify(G_State.goals));
+            localStorage.setItem('archive_goals_v2', JSON.stringify(G_State.goals));
             localStorage.setItem('archive_calendar', JSON.stringify(G_State.calendar));
             localStorage.setItem('archive_guestbook', JSON.stringify(G_State.guestbook));
             localStorage.setItem('archive_logs', JSON.stringify(G_State.logs));
@@ -698,46 +836,248 @@
             document.getElementById('editPercentCalc').value = (tgt > 0 ? Math.min(100, Math.round((act / tgt) * 100)) : 0) + "%";
         }
 
-        function toggleGoalForm() {
+        /* --- 개편된 목표 핸들러 시스템 (CRUD + 정렬) --- */
+        function openNewGoalForm() {
             const f = document.getElementById('goalFormContainer');
-            f.style.display = f.style.display === 'block' ? 'none' : 'block';
+            document.getElementById('formTitle').innerText = "✨ 새 목표 추가";
+            document.getElementById('formGoalId').value = "";
+            document.getElementById('goalName').value = "";
+            document.getElementById('goalCategory').value = "";
+            document.getElementById('goalDeadline').value = "2026-07-13";
+            document.getElementById('goalStatus').value = "active";
+            document.getElementById('goalNextAction').value = "";
+            document.getElementById('goalManualProgress').value = "";
+            tempCheckpoints = [];
+            renderFormCheckpoints();
+            f.style.display = 'block';
+            f.scrollIntoView({ behavior: 'smooth' });
         }
 
-        // 목표 렌더러
-        function renderGoals() {
-            const grid = document.getElementById('goalGrid');
-            grid.innerHTML = '';
-            G_State.goals.forEach(g => {
-                const pct = g.target > 0 ? Math.min(100, Math.round((g.current / g.target) * 100)) : 0;
-                grid.innerHTML += `
-                    <div class="goal-card">
-                        <button class="goal-delete-btn" onclick="deleteGoal(${g.id})">✕</button>
-                        <div class="goal-title-wrap">
-                            <span>${escapeHtml(g.title)}</span>
-                            <span style="color: var(--color-point);">${g.current}/${g.target}</span>
-                        </div>
-                        <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${pct}%;"></div></div>
+        function openEditGoalForm(id) {
+            const f = document.getElementById('goalFormContainer');
+            const g = G_State.goals.find(item => item.id === id);
+            if (!g) return;
+
+            document.getElementById('formTitle').innerText = "📝 목표 커스텀 수정";
+            document.getElementById('formGoalId').value = g.id;
+            document.getElementById('goalName').value = g.title;
+            document.getElementById('goalCategory').value = g.category || "";
+            document.getElementById('goalDeadline').value = g.deadline || "";
+            document.getElementById('goalStatus').value = g.status || "active";
+            document.getElementById('goalNextAction').value = g.nextAction || "";
+            document.getElementById('goalManualProgress').value = g.manualProgress || 0;
+            
+            tempCheckpoints = g.checkpoints ? JSON.parse(JSON.stringify(g.checkpoints)) : [];
+            renderFormCheckpoints();
+            f.style.display = 'block';
+            f.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function closeGoalForm() {
+            document.getElementById('goalFormContainer').style.display = 'none';
+        }
+
+        function addCheckpointToFormList() {
+            const input = document.getElementById('chkInputText');
+            const text = input.value.trim();
+            if (!text) { showToast("체크포인트 내용을 입력하세요."); return; }
+            tempCheckpoints.push({ text: text, checked: false });
+            input.value = "";
+            renderFormCheckpoints();
+        }
+
+        function removeCheckpointFromFormList(index) {
+            tempCheckpoints.splice(index, 1);
+            renderFormCheckpoints();
+        }
+
+        function renderFormCheckpoints() {
+            const container = document.getElementById('formCheckpointList');
+            container.innerHTML = '';
+            tempCheckpoints.forEach((chk, idx) => {
+                container.innerHTML += `
+                    <div class="checkpoint-added-item">
+                        <span>${escapeHtml(chk.text)}</span>
+                        <button class="goal-ctrl-btn" onclick="removeCheckpointFromFormList(${idx})" style="color:var(--status-red)">✕</button>
                     </div>`;
             });
         }
 
-        function addGoal() {
+        function submitGoalForm() {
+            const id = document.getElementById('formGoalId').value;
             const title = document.getElementById('goalName').value.trim();
-            const curr = parseInt(document.getElementById('goalCurrent').value) || 0;
-            const tgt = parseInt(document.getElementById('goalTarget').value) || 0;
-            if (!title || tgt <= 0) { showToast("유효한 목표값 설정을 진행하세요."); return; }
-            G_State.goals.push({ id: Date.now(), title, current: curr, target: tgt });
-            saveAllToStorage(); renderGoals(); toggleGoalForm();
-            showToast("목표 인덱스가 갱신되었습니다.");
+            const category = document.getElementById('goalCategory').value.trim() || '일반';
+            const deadline = document.getElementById('goalDeadline').value;
+            const status = document.getElementById('goalStatus').value;
+            const nextAction = document.getElementById('goalNextAction').value.trim();
+            const manualProgress = parseInt(document.getElementById('goalManualProgress').value) || 0;
+
+            if (!title) { showToast("목표 이름을 명시해주세요."); return; }
+
+            if (id) {
+                // 수정 모드
+                const gIdx = G_State.goals.findIndex(g => g.id == id);
+                if (gIdx !== -1) {
+                    G_State.goals[gIdx] = { 
+                        ...G_State.goals[gIdx], 
+                        title, category, deadline, status, nextAction, manualProgress,
+                        checkpoints: tempCheckpoints 
+                    };
+                    showToast("목표 마일스톤이 성공적으로 수정되었습니다.");
+                }
+            } else {
+                // 신규 생성
+                G_State.goals.push({
+                    id: Date.now(),
+                    title, category, deadline, status, nextAction, manualProgress,
+                    checkpoints: tempCheckpoints
+                });
+                showToast("새로운 성장 목표가 추가되었습니다.");
+            }
+
+            saveAllToStorage();
+            renderGoals();
+            closeGoalForm();
         }
 
         function deleteGoal(id) {
-            G_State.goals = G_State.goals.filter(g => g.id !== id);
-            saveAllToStorage(); renderGoals();
-            showToast("선택 목표 요소가 삭제되었습니다.");
+            if (confirm("이 목표 마일스톤과 관련된 세부 체크포인트를 모두 영구 삭제하시겠습니까?")) {
+                G_State.goals = G_State.goals.filter(g => g.id !== id);
+                saveAllToStorage();
+                renderGoals();
+                showToast("목표가 아카이브에서 제거되었습니다.");
+            }
         }
 
-        // Today's Focus 연동부
+        function toggleCheckpointCard(goalId, chkIdx, checked) {
+            const g = G_State.goals.find(item => item.id === goalId);
+            if (g && g.checkpoints && g.checkpoints[chkIdx]) {
+                g.checkpoints[chkIdx].checked = checked;
+                saveAllToStorage();
+                renderGoals();
+            }
+        }
+
+        function moveGoalOrder(id, direction) {
+            const idx = G_State.goals.findIndex(g => g.id === id);
+            if (idx === -1) return;
+            const targetIdx = idx + direction;
+            if (targetIdx < 0 || targetIdx >= G_State.goals.length) return;
+
+            // 스왑 정렬 구현
+            const temp = G_State.goals[idx];
+            G_State.goals[idx] = G_State.goals[targetIdx];
+            G_State.goals[targetIdx] = temp;
+
+            saveAllToStorage();
+            renderGoals();
+        }
+
+        function parseDDay(deadlineStr) {
+            if (!deadlineStr) return { text: 'D-Day 미설정', clazz: '' };
+            const dDate = new Date(deadlineStr);
+            dDate.setHours(0,0,0,0);
+            const tDate = new Date(TODAY_FULL_DATE);
+            tDate.setHours(0,0,0,0);
+
+            const diffTime = dDate.getTime() - tDate.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays < 0) {
+                return { text: '기한 지남', clazz: 'overdue' };
+            } else if (diffDays === 0) {
+                return { text: 'D-Day', clazz: 'urgent' };
+            } else if (diffDays <= 3) {
+                return { text: `D-${diffDays} (마감임박)`, clazz: 'urgent' };
+            } else {
+                return { text: `D-${diffDays}`, clazz: '' };
+            }
+        }
+
+        function renderGoals() {
+            const grid = document.getElementById('goalGrid');
+            grid.innerHTML = '';
+
+            if (G_State.goals.length === 0) {
+                grid.innerHTML = `<div class="goal-empty-state">현재 보관함에 등록된 성장 목표가 없습니다. '목표 추가하기'를 탭해 첫 마일스톤을 구축해보세요!</div>`;
+                return;
+            }
+
+            G_State.goals.forEach(g => {
+                let pct = 0;
+                let chkListHtml = '';
+
+                // 체크포인트 유무에 따른 동적 백분율 연산
+                if (g.checkpoints && g.checkpoints.length > 0) {
+                    const completedCount = g.checkpoints.filter(c => c.checked).length;
+                    pct = Math.min(100, Math.round((completedCount / g.checkpoints.length) * 100));
+                    
+                    chkListHtml = `
+                        <div class="goal-checkpoints-box">
+                            <div class="goal-checkpoints-title">📋 마일스톤 체크포인트 (${completedCount}/${g.checkpoints.length})</div>
+                            ${g.checkpoints.map((chk, idx) => `
+                                <label class="goal-chk-item ${chk.checked ? 'checked' : ''}">
+                                    <input type="checkbox" ${chk.checked ? 'checked' : ''} onchange="toggleCheckpointCard(${g.id}, ${idx}, this.checked)">
+                                    <span>${escapeHtml(chk.text)}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    `;
+                } else {
+                    pct = g.manualProgress || 0;
+                    chkListHtml = `
+                        <div class="goal-checkpoints-box">
+                            <div class="goal-checkpoints-title" style="color:var(--color-text-muted); font-style:italic;">자율 구성 목표 (체크포인트 없음)</div>
+                        </div>
+                    `;
+                }
+
+                const ddayInfo = parseDDay(g.deadline);
+                let statusLabel = '진행 중';
+                if (g.status === 'paused') statusLabel = '잠시 멈춤';
+                if (g.status === 'completed') statusLabel = '완료';
+
+                grid.innerHTML += `
+                    <div class="goal-card status-${g.status}">
+                        <div class="goal-card-controls">
+                            <button class="goal-ctrl-btn" onclick="moveGoalOrder(${g.id}, -1)" title="위로 정렬">▲</button>
+                            <button class="goal-ctrl-btn" onclick="moveGoalOrder(${g.id}, 1)" title="아래로 정렬">▼</button>
+                            <button class="goal-ctrl-btn" onclick="openEditGoalForm(${g.id})" title="목표 수정">✏️</button>
+                            <button class="goal-ctrl-btn" onclick="deleteGoal(${g.id})" style="color:var(--status-red);" title="삭제">✕</button>
+                        </div>
+
+                        <div class="goal-meta-top">
+                            <div class="goal-badge-wrap">
+                                <span class="goal-badge badge-cat">${escapeHtml(g.category)}</span>
+                                <span class="goal-badge badge-status status-${g.status}">${statusLabel}</span>
+                            </div>
+                            <span class="goal-dday ${ddayInfo.clazz}">${ddayInfo.text}</span>
+                        </div>
+
+                        <div class="goal-title">${escapeHtml(g.title)}</div>
+
+                        ${g.nextAction ? `
+                            <div class="goal-next-action">
+                                <strong>⚡ 다음 행동:</strong> ${escapeHtml(g.nextAction)}
+                            </div>
+                        ` : ''}
+
+                        ${chkListHtml}
+
+                        <div class="goal-progress-wrap">
+                            <div class="goal-progress-text">
+                                <span>성장 달성도</span>
+                                <span>${pct}%</span>
+                            </div>
+                            <div class="progress-bar-bg">
+                                <div class="progress-bar-fill" style="width: ${pct}%; background-color: ${g.status === 'completed' ? 'var(--status-green)' : 'var(--color-point)'};"></div>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        /* --- Today's Focus 기능부 --- */
         function toggleFocusEditForm() {
             const wrap = document.getElementById('focusEditFormWrap');
             if (wrap.style.display === 'block') { wrap.style.display = 'none'; }
@@ -787,7 +1127,7 @@
             showToast("오늘의 포커스 집중 지표가 저장되었습니다.");
         }
 
-        // 캘린더 구성부 (1일부터 31일까지 순차적으로 전개 및 당일에만 테두리)
+        /* --- 캘린더 핵심 엔진 --- */
         function renderCalendar() {
             const grid = document.getElementById('calendarGrid');
             grid.innerHTML = '';
@@ -799,7 +1139,6 @@
                 const tooltipText = `${day}일 지표\n상태: ${getLightName(dData.status)}\n목표: ${dData.targetHours || 0}h / 실제: ${dData.actualHours || 0}h\n달성률: ${dData.percent || 0}%\n기록: ${dData.oneLine || '기록 없음'}`;
 
                 const dayEl = document.createElement('div');
-                // 당일(13일)에만 .today 클래스 부여 (CSS에서 진한 테두리 처리)
                 dayEl.className = `calendar-day day-${dData.status} ${isToday ? 'today' : ''}`;
                 dayEl.setAttribute('data-tooltip', tooltipText);
                 dayEl.innerHTML = `<span class="day-num">${day}일</span>`;
@@ -846,7 +1185,6 @@
             document.getElementById(labelId).innerText = `${val.length} / ${maxLen}자`;
         }
 
-        // 전체 통계 연산
         function calculateWeeklyStats() {
             let totalHours = 0, achievedDays = 0, sumPercent = 0, activeRecordCount = 0, validDaysCount = 0;
             let greenDays = 0;
@@ -869,7 +1207,7 @@
             document.getElementById('statLineCount').innerHTML = `${activeRecordCount}<span>개</span>`;
         }
 
-        // 성장 일지 제어 엔진 (CRUD)
+        /* --- 성장 일지 시스템 --- */
         function renderGrowthLogs() {
             const grid = document.getElementById('logGrid');
             grid.innerHTML = '';
@@ -918,7 +1256,7 @@
             }
         }
 
-        // 데이터 초기화 허브
+        /* --- 데이터 리셋 허브 --- */
         function resetTodayFocus() {
             if (confirm("오늘 대시보드 Focus 수치를 초기화하시겠습니까?")) {
                 G_State.calendar[TODAY_DAY] = { status: 'none', targetHours: 0, actualHours: 0, percent: 0, oneLine: '' };
@@ -934,15 +1272,15 @@
             }
         }
         function resetAllData() {
-            if (confirm(`[경고] 전체 초기화를 진행하시겠습니까?\n\n이 작업 수행 시 현재 핵심 목표, 포커스 데이터, 1~31일 기록, 성장 일지, 방명록이 완전히 영구 삭제됩니다.`)) {
+            if (confirm(`[경고] 전체 초기화를 진행하시겠습니까?\n\n이 작업 수행 시 핵심 목표 마일스톤, 포커스 데이터, 캘린더 기록, 성장 일지, 방명록이 영구 삭제됩니다.`)) {
                 localStorage.clear(); initDefaultStorage(); syncStateToUI(); renderGoals(); renderCalendar(); calculateWeeklyStats(); renderGrowthLogs(); renderGuestbook();
                 showToast("시스템 리셋이 완료되었습니다.");
             }
         }
 
-        // 백업 및 복구 파이프라인
+        /* --- 백업 및 복원 엔진 --- */
         function triggerBackup() {
-            const backup = { version: "1.2.0", exportedAt: new Date().toISOString(), goals: G_State.goals, calendar: G_State.calendar, guestbook: G_State.guestbook, logs: G_State.logs, theme: localStorage.getItem('theme') || 'light' };
+            const backup = { version: "2.0.0", exportedAt: new Date().toISOString(), goals: G_State.goals, calendar: G_State.calendar, guestbook: G_State.guestbook, logs: G_State.logs, theme: localStorage.getItem('theme') || 'light' };
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backup));
             const anchor = document.createElement('a');
             anchor.setAttribute("href", dataStr);
@@ -957,9 +1295,12 @@
             reader.onload = function(evt) {
                 try {
                     const imported = JSON.parse(evt.target.result);
-                    if (!imported.goals || !imported.calendar || !imported.guestbook || !imported.logs) { alert("올바르지 않은 백업 양식입니다."); return; }
+                    if (!imported.calendar || !imported.guestbook || !imported.logs) { alert("올바르지 않은 백업 양식입니다."); return; }
                     if (confirm("기존 내역을 지우고 이 백업 본으로 전면 복원하시겠습니까?")) {
-                        G_State.goals = imported.goals; G_State.calendar = imported.calendar; G_State.guestbook = imported.guestbook; G_State.logs = imported.logs;
+                        G_State.goals = imported.goals || [];
+                        G_State.calendar = imported.calendar; 
+                        G_State.guestbook = imported.guestbook; 
+                        G_State.logs = imported.logs;
                         if(imported.theme) { document.documentElement.setAttribute('data-theme', imported.theme); localStorage.setItem('theme', imported.theme); }
                         if (!G_State.calendar[TODAY_DAY]) { G_State.calendar[TODAY_DAY] = { status: 'none', targetHours: 0, actualHours: 0, percent: 0, oneLine: '' }; }
                         saveAllToStorage(); syncStateToUI(); renderGoals(); renderCalendar(); calculateWeeklyStats(); renderGrowthLogs(); renderGuestbook();
@@ -970,7 +1311,7 @@
             reader.readAsText(file); e.target.value = '';
         }
 
-        // 방명록 모듈
+        /* --- 러닝메이트 방명록 모듈 --- */
         function renderGuestbook() {
             const listEl = document.getElementById('guestbookList'); listEl.innerHTML = '';
             if (G_State.guestbook.length === 0) { listEl.innerHTML = `<div class="guestbook-empty">등록된 방명록이 없습니다.</div>`; return; }
@@ -995,7 +1336,7 @@
         }
         function deleteGuestbookMsg(id) { G_State.guestbook = G_State.guestbook.filter(m => m.id !== id); saveAllToStorage(); renderGuestbook(); showToast("방명록 글이 삭제되었습니다."); }
 
-        // 파티클 Canvas 배경 효과 엔진
+        /* --- 파티클 애니메이션 백그라운드 엔진 --- */
         const ParticleEngine = (function() {
             let canvas, ctx, particles = [], id;
             class P {
@@ -1004,7 +1345,7 @@
                 draw(c, a) { ctx.fillStyle = c; ctx.globalAlpha = a; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); }
             }
             function init() { canvas = document.getElementById('particle-canvas'); ctx = canvas.getContext('2d'); resize(); for (let i = 0; i < 45; i++) particles.push(new P(canvas.width, canvas.height)); loop(); }
-            function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+            function resize() { if(canvas) { canvas.width = window.innerWidth; canvas.height = window.innerHeight; } }
             function loop() {
                 const s = getComputedStyle(document.documentElement);
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -1014,7 +1355,7 @@
             return { init, resize };
         })();
 
-        // 어플리케이션 초기 부트스트랩 단계
+        // 어플리케이션 도큐먼트 부트스트랩
         window.addEventListener('DOMContentLoaded', () => {
             loadStorage();
             renderGoals();
@@ -1024,7 +1365,6 @@
             renderGrowthLogs();
             renderGuestbook();
             
-            // 오늘 날짜 2026-07-13 기본값 설정
             document.getElementById('logInputDate').value = "2026-07-13";
 
             ParticleEngine.init();
