@@ -38,6 +38,10 @@
             --cta-gradient: linear-gradient(to top, rgba(224, 122, 95, 0.08), transparent);
             --img-filter: brightness(1);
             --bg-opacity: 0.08;
+
+            /* 배경 파티클 알파값 (라이트모드) */
+            --particle-alpha: 0.12;
+            --parallax-blur-opacity: 0.05;
         }
 
         /* --- Design System Tokens (Dark Mode) --- */
@@ -65,6 +69,10 @@
             --cta-gradient: linear-gradient(to top, rgba(242, 132, 130, 0.05), transparent);
             --img-filter: brightness(0.85); /* 다크모드 눈부심 방지 */
             --bg-opacity: 0.04;
+
+            /* 배경 파티클 알파값 (다크모드) */
+            --particle-alpha: 0.25;
+            --parallax-blur-opacity: 0.03;
         }
 
         /* --- CSS Animations --- */
@@ -107,6 +115,7 @@
             overflow-wrap: break-word; 
             animation: fadeIn 1s ease-out;
             overflow-x: hidden;
+            position: relative;
         }
 
         a {
@@ -123,6 +132,8 @@
             margin: 0 auto;
             padding: 0 24px;
             width: 100%;
+            position: relative;
+            z-index: 2; /* 콘텐츠를 배경 위로 올림 */
         }
 
         section {
@@ -131,6 +142,8 @@
             opacity: 0;
             transform: translateY(20px);
             transition: opacity 0.8s ease-out, transform 0.8s ease-out, background-color 0.3s ease, border-color 0.3s ease;
+            position: relative;
+            z-index: 2;
         }
 
         section.visible {
@@ -150,6 +163,43 @@
             font-size: 1rem;
             color: var(--color-text-muted);
             margin-bottom: 40px;
+        }
+
+        /* --- [추가] 배경 장식용 애니메이션 레이어 --- */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none; /* 클릭 및 입력을 방해하지 않음 */
+        }
+
+        .parallax-bg-blur {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            pointer-events: none;
+            z-index: 1;
+            opacity: var(--parallax-blur-opacity);
+            background: var(--color-point);
+            will-change: transform; /* 성능 최적화 */
+        }
+
+        #bg-blur-1 {
+            width: 400px;
+            height: 400px;
+            top: 20%;
+            left: -150px;
+        }
+
+        #bg-blur-2 {
+            width: 500px;
+            height: 500px;
+            top: 55%;
+            right: -200px;
+            background: var(--color-main);
         }
 
         /* --- 스크롤 진행률 상단바 스타일 --- */
@@ -480,7 +530,7 @@
             gap: 16px;
             margin-top: 16px;
             font-size: 0.85rem;
-            color: var(--color-text-muted);
+            color: var(--text-muted);
             flex-wrap: wrap;
         }
         .legend-item { display: flex; align-items: center; gap: 6px; }
@@ -689,6 +739,18 @@
             font-weight: 500;
         }
 
+        /* --- 애니메이션 축소 모드 대응 (Accessibility) --- */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-delay: 0s !important;
+                animation-duration: 0s !important;
+                transition-duration: 0s !important;
+            }
+            .parallax-bg-blur {
+                display: none !important;
+            }
+        }
+
         /* --- Responsive Styles --- */
         @media (max-width: 768px) {
             .theme-toggle-btn { top: 16px; right: 16px; }
@@ -714,6 +776,10 @@
             .cta-section { padding: 60px 0; }
             .cta-section .btn { width: 100%; text-align: center; }
             .record-form-wrap { padding: 20px; margin: 30px 0 0 0; }
+
+            /* 모바일 배경 장식 간소화 */
+            #bg-blur-1 { width: 250px; height: 250px; left: -100px; }
+            #bg-blur-2 { width: 300px; height: 300px; right: -120px; }
         }
 
         @media (max-width: 380px) {
@@ -742,6 +808,10 @@
     </script>
 </head>
 <body>
+
+    <canvas id="particle-canvas"></canvas>
+    <div class="parallax-bg-blur" id="bg-blur-1"></div>
+    <div class="parallax-bg-blur" id="bg-blur-2"></div>
 
     <div class="scroll-progress-container">
         <div class="scroll-progress-bar" id="scrollProgressBar"></div>
@@ -966,19 +1036,30 @@
             }
         }
 
-        // 스크롤 진행률 업데이트 함수 (requestAnimationFrame 연동 성능 최적화)
-        function updateScrollProgress() {
-            const progressBar = document.getElementById('scrollProgressBar');
-            if (!progressBar) return;
+        // 스크롤 동기화 통합 관리 매니저 (진행률 상단바 + 패럴랙스 배경 요소)
+        function handleScrollInteractions() {
+            const scrollY = window.scrollY;
 
-            const totalHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-            if (totalHeight === 0) {
-                progressBar.style.width = '0%';
-                return;
+            // 1. 스크롤 진행률 업데이트
+            const progressBar = document.getElementById('scrollProgressBar');
+            if (progressBar) {
+                const totalHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                const progress = totalHeight === 0 ? 0 : (scrollY / totalHeight) * 100;
+                progressBar.style.width = `${progress}%`;
             }
 
-            const progress = (window.scrollY / totalHeight) * 100;
-            progressBar.style.width = `${progress}%`;
+            // 2. 패럴랙스 배경 요소 이동 제어 (애니메이션 감소 옵션 미활성 시에만 작동)
+            const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (!prefersReduced) {
+                const blur1 = document.getElementById('bg-blur-1');
+                const blur2 = document.getElementById('bg-blur-2');
+                
+                // 모바일 해상도일 경우 패럴랙스 이동 범위 제어 감쇄 적용
+                const speedModifier = window.innerWidth < 768 ? 0.05 : 0.12; 
+                
+                if (blur1) blur1.style.transform = `translate3d(0, ${scrollY * speedModifier}px, 0)`;
+                if (blur2) blur2.style.transform = `translate3d(0, ${-scrollY * (speedModifier * 0.8)}px, 0)`;
+            }
         }
 
         // 1. 목표 대시보드 렌더링 엔진
@@ -1146,6 +1227,102 @@
             document.getElementById('logs').scrollIntoView({ behavior: 'smooth' });
         }
 
+        // --- [추가] 6. 은은한 배경 파티클 애니메이션 엔진 ---
+        const ParticleEngine = (function() {
+            const canvas = document.getElementById('particle-canvas');
+            let ctx = null;
+            let particles = [];
+            let animationFrameId = null;
+
+            class Particle {
+                constructor(w, h) {
+                    this.rescale(w, h);
+                    this.y = Math.random() * h; // 초기 세팅 시 화면 가로지르게 분산
+                }
+
+                rescale(w, h) {
+                    this.x = Math.random() * w;
+                    this.y = h + Math.random() * 20; // 하단에서 리스폰
+                    this.radius = Math.random() * (window.innerWidth < 768 ? 1.5 : 2.5) + 0.5;
+                    this.speed = Math.random() * 0.3 + 0.1;
+                    this.opacity = Math.random() * 0.5 + 0.2;
+                    this.fadeSpeed = Math.random() * 0.01 + 0.005;
+                    this.isFadingIn = true;
+                }
+
+                update(w, h) {
+                    this.y -= this.speed; // 은은하게 상단으로 부유
+
+                    // 투명도 호흡 효과
+                    if (this.isFadingIn) {
+                        this.opacity += this.fadeSpeed;
+                        if (this.opacity >= 0.9) this.isFadingIn = false;
+                    } else {
+                        this.opacity -= this.fadeSpeed;
+                        if (this.opacity <= 0.2) this.isFadingIn = true;
+                    }
+
+                    // 화면 상단 이탈 시 하단 재배치
+                    if (this.y < -10) {
+                        this.rescale(w, h);
+                    }
+                }
+
+                draw(colorHex, alphaModifier) {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                    // CSS 변수의 알파값과 결합하여 은은한 색상 표현
+                    ctx.fillStyle = colorHex + Math.floor(this.opacity * alphaModifier * 255).toString(16).padStart(2, '0');
+                    ctx.fill();
+                }
+            }
+
+            function init() {
+                if (!canvas) return;
+                ctx = canvas.getContext('2d');
+                resizeCanvas();
+                
+                // 접근성(애니메이션 축소) 감지 및 모바일 기기 사양 타협 설계
+                const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                const pCount = prefersReduced ? 0 : (window.innerWidth < 768 ? 25 : 60);
+
+                particles = [];
+                for (let i = 0; i < pCount; i++) {
+                    particles.push(new Particle(canvas.width, canvas.height));
+                }
+
+                if (pCount > 0) {
+                    loop();
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+            }
+
+            function resizeCanvas() {
+                if (!canvas) return;
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+
+            function loop() {
+                // CSS 테마 변수 실시간 추적 추출
+                const computedStyle = getComputedStyle(document.documentElement);
+                const pointColor = computedStyle.getPropertyValue('--color-point').trim(); // 예: #3D5A80
+                const currentAlpha = parseFloat(computedStyle.getPropertyValue('--particle-alpha').trim() || 0.15);
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                particles.forEach(p => {
+                    p.update(canvas.width, canvas.height);
+                    p.draw(pointColor, currentAlpha);
+                });
+
+                animationFrameId = requestAnimationFrame(loop);
+            }
+
+            return { init, resize: resizeCanvas };
+        })();
+
         // 문서 로드 완료 시 구동
         window.addEventListener('DOMContentLoaded', () => {
             renderGoals();
@@ -1156,10 +1333,18 @@
             const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
             updateToggleButtonText(currentTheme);
 
-            // 초기 스크롤 바 및 이벤트 연결
-            updateScrollProgress();
+            // 초기 파티클 엔진 가동
+            ParticleEngine.init();
+
+            // 초기 스크롤 바 및 이벤트 연결 (requestAnimationFrame 래핑)
+            handleScrollInteractions();
             window.addEventListener('scroll', () => {
-                window.requestAnimationFrame(updateScrollProgress);
+                window.requestAnimationFrame(handleScrollInteractions);
+            });
+
+            // 창 크기 변화 대응 리사이즈 매핑
+            window.addEventListener('resize', () => {
+                ParticleEngine.resize();
             });
         });
     </script>
