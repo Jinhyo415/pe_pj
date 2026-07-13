@@ -10,13 +10,21 @@
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
 
     <style>
-        /* --- Design System Tokens --- */
+        /* --- Design System Tokens (Light Mode) --- */
         :root {
             --color-main: #E07A5F;       /* 테라코타 오렌지 */
+            --color-main-hover: #d0694e;
             --color-bg: #F4F1DE;         /* 오프화이트 크림 */
             --color-point: #3D5A80;      /* 딥 블루 */
-            --color-text: #2F3E46;
+            --color-text: #2F3E46;       /* 진한 차콜 텍스트 */
+            --color-text-muted: #666666;
             --color-card-bg: #FFFFFF;
+            --color-card-sub-bg: #FAF9F5;
+            --color-border: rgba(61, 90, 128, 0.1);
+            --color-input-border: #D9D9D9;
+            --color-line: #EAE7DC;
+            --color-footer-bg: #EAE7DC;
+            
             --font-title: 'Gowun Batang', serif;
             --font-body: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
             
@@ -24,6 +32,39 @@
             --status-green: #81B29A;
             --status-yellow: #F2CC8F;
             --status-red: #E07A5F;
+
+            /* 그라데이션 및 이미지 필터 */
+            --hero-gradient: linear-gradient(to bottom, rgba(224, 122, 95, 0.08), transparent);
+            --cta-gradient: linear-gradient(to top, rgba(224, 122, 95, 0.08), transparent);
+            --img-filter: brightness(1);
+            --bg-opacity: 0.08;
+        }
+
+        /* --- Design System Tokens (Dark Mode) --- */
+        :root[data-theme="dark"] {
+            --color-main: #F28482;       /* 다크모드 대응 조금 더 밝고 선명한 테라코타 */
+            --color-main-hover: #E07A5F;
+            --color-bg: #1A1E24;         /* 깊은 다크 차콜/네이비 */
+            --color-point: #98C1D9;      /* 가독성을 높인 연한 블루 */
+            --color-text: #E0E2E5;       /* 눈이 편안한 밝은 그레이 텍스트 */
+            --color-text-muted: #A0A5B0;
+            --color-card-bg: #242A32;    /* 레이어 구분을 위한 짙은 카드 배경 */
+            --color-card-sub-bg: #2C333D;
+            --color-border: rgba(152, 193, 217, 0.15);
+            --color-input-border: #4A5260;
+            --color-line: #333A45;
+            --color-footer-bg: #14171C;
+
+            /* 다크모드 신호등 가독성 개선 */
+            --status-green: #98C1A9;
+            --status-yellow: #F4D39F;
+            --status-red: #F28482;
+
+            /* 다크모드 특화 효과 */
+            --hero-gradient: linear-gradient(to bottom, rgba(242, 132, 130, 0.05), transparent);
+            --cta-gradient: linear-gradient(to top, rgba(242, 132, 130, 0.05), transparent);
+            --img-filter: brightness(0.85); /* 다크모드 눈부심 방지 */
+            --bg-opacity: 0.04;
         }
 
         /* --- CSS Animations --- */
@@ -48,11 +89,12 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            /* 테마 전환 시 부드러운 색상 변화 */
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, filter 0.3s ease;
         }
 
         html {
             scroll-behavior: smooth;
-            /* 모바일 가로 스크롤 원천 차단 */
             overflow-x: hidden; 
         }
 
@@ -61,7 +103,6 @@
             background-color: var(--color-bg);
             color: var(--color-text);
             line-height: 1.6;
-            /* 텍스트가 화면 경계를 넘어갈 때 자연스럽게 줄바꿈 처리 */
             word-break: keep-all;
             overflow-wrap: break-word; 
             animation: fadeIn 1s ease-out;
@@ -86,10 +127,10 @@
 
         section {
             padding: 100px 0;
-            border-bottom: 1px solid rgba(61, 90, 128, 0.1);
+            border-bottom: 1px solid var(--color-border);
             opacity: 0;
             transform: translateY(20px);
-            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out, background-color 0.3s ease, border-color 0.3s ease;
         }
 
         section.visible {
@@ -107,8 +148,31 @@
 
         .section-desc {
             font-size: 1rem;
-            color: #666;
+            color: var(--color-text-muted);
             margin-bottom: 40px;
+        }
+
+        /* --- 테마 스위치 버튼 스타일 --- */
+        .theme-toggle-btn {
+            position: fixed;
+            top: 20px;
+            right: 24px;
+            z-index: 1000;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background-color: var(--color-card-bg);
+            border: 1px solid var(--color-input-border);
+            color: var(--color-text);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .theme-toggle-btn:hover {
+            transform: scale(1.05);
         }
 
         /* --- 이미지 공통 스타일 --- */
@@ -118,7 +182,8 @@
             object-fit: cover;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            display: block; /* 하단 여백 제거 */
+            display: block;
+            filter: var(--img-filter);
         }
 
         /* --- Buttons & Inputs --- */
@@ -131,37 +196,41 @@
             font-weight: 600;
             border: none;
             cursor: pointer;
-            transition: background 0.2s ease, transform 0.2s ease;
-            /* 모바일 터치 오동작 방지 및 최소 터치 크기 확보 */
             min-height: 44px; 
             vertical-align: middle;
+            transition: background-color 0.2s ease, transform 0.2s ease, color 0.2s ease;
         }
 
         .btn:hover {
-            background-color: #d0694e;
+            background-color: var(--color-main-hover);
             transform: translateY(-2px);
         }
 
         .input-field {
             width: 100%;
-            padding: 12px 14px; /* 터치 편의성을 위해 패딩 소폭 확대 */
-            border: 1px solid #D9D9D9;
+            padding: 12px 14px;
+            border: 1px solid var(--color-input-border);
             border-radius: 6px;
-            background-color: #fff;
+            background-color: var(--color-card-bg);
+            color: var(--color-text);
             font-size: 0.95rem;
-            min-height: 44px; /* 모바일 입력창 터치 영역 높이 확보 */
+            min-height: 44px;
         }
 
         .input-field:focus {
             outline: none;
             border-color: var(--color-point);
         }
+        .input-field::placeholder {
+            color: var(--color-text-muted);
+            opacity: 0.7;
+        }
 
         /* --- Hero Section --- */
         .hero {
-            padding: 40px 0 80px 0; /* 모바일 고려 상단 패딩 소폭 조정 */
+            padding: 60px 0 80px 0;
             text-align: center;
-            background: linear-gradient(to bottom, rgba(224, 122, 95, 0.08), transparent);
+            background: var(--hero-gradient);
             animation: fadeInUp 1s ease-out forwards;
         }
 
@@ -220,13 +289,12 @@
         }
 
         .goal-card {
-            background: #FAF9F5;
+            background: var(--color-card-sub-bg);
             padding: 20px;
             border-radius: 8px;
             border-left: 4px solid var(--color-main);
             position: relative;
             animation: fadeIn 0.5s ease-out;
-            /* 카드 내부 긴 단어 쪼개짐 방지 및 줄바꿈 */
             word-break: break-all; 
         }
 
@@ -236,12 +304,12 @@
             align-items: flex-start;
             font-weight: 600;
             margin-bottom: 8px;
-            padding-right: 20px; /* 삭제 버튼과 겹침 방지 여백 */
+            padding-right: 20px;
             gap: 8px;
         }
 
         .progress-bar-bg {
-            background: #EAE7DC;
+            background: var(--color-line);
             height: 8px;
             border-radius: 4px;
             overflow: hidden;
@@ -261,17 +329,18 @@
             right: 12px;
             background: none;
             border: none;
-            color: #ccc;
+            color: var(--color-text-muted);
             cursor: pointer;
-            font-size: 1rem; /* 모바일에서 터치하기 편하도록 크기 업 */
+            font-size: 1rem;
             padding: 4px;
+            opacity: 0.6;
         }
-        .goal-delete-btn:hover { color: var(--color-main); }
+        .goal-delete-btn:hover { color: var(--color-main); opacity: 1; }
 
         .goal-form-container {
             margin-top: 24px;
             padding-top: 24px;
-            border-top: 1px dashed #EAE7DC;
+            border-top: 1px dashed var(--color-line);
             display: none;
             animation: fadeIn 0.3s ease-out;
         }
@@ -295,7 +364,7 @@
             border-radius: 12px;
             text-align: center;
             box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, background-color 0.3s ease;
         }
 
         .focus-card:hover {
@@ -304,7 +373,7 @@
 
         .focus-card h4 {
             font-size: 0.9rem;
-            color: #777;
+            color: var(--color-text-muted);
             margin-bottom: 16px;
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -317,10 +386,10 @@
         }
 
         .light {
-            width: 38px;  /* 터치 정확도를 위해 소폭 확장 */
+            width: 38px;
             height: 38px;
             border-radius: 50%;
-            opacity: 0.2;
+            opacity: 0.25;
             cursor: pointer;
             transition: opacity 0.2s, transform 0.2s;
         }
@@ -342,14 +411,13 @@
         .focus-value span {
             font-size: 1rem;
             font-family: var(--font-body);
-            color: #666;
+            color: var(--color-text-muted);
             margin-left: 4px;
         }
 
         /* --- Growth Calendar --- */
         .calendar-grid {
             display: grid;
-            /* 360px 모바일 화면에서도 깨지거나 삐져나가지 않도록 minmax 구조 최적화 */
             grid-template-columns: repeat(auto-fill, minmax(32px, 1fr)); 
             gap: 8px;
             background: var(--color-card-bg);
@@ -361,30 +429,16 @@
         .calendar-day {
             aspect-ratio: 1;
             border-radius: 4px;
-            background-color: #EAE7DC;
+            background-color: var(--color-line);
             position: relative;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: transform 0.2s, background-color 0.3s;
         }
         .calendar-day:hover {
             transform: scale(1.15);
             z-index: 5;
         }
-        .calendar-day:hover::after {
-            content: attr(data-date);
-            position: absolute;
-            bottom: 125%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--color-point);
-            color: #fff;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            white-space: nowrap;
-            z-index: 10;
-        }
-        /* 모바일 터치 디바이스 가시성을 위한 활성화 상태 대응 */
+        .calendar-day:hover::after,
         .calendar-day:active::after {
             content: attr(data-date);
             position: absolute;
@@ -409,8 +463,8 @@
             gap: 16px;
             margin-top: 16px;
             font-size: 0.85rem;
-            color: #666;
-            flex-wrap: wrap; /* 모바일에서 자동 줄바꿈 제공 */
+            color: var(--color-text-muted);
+            flex-wrap: wrap;
         }
         .legend-item { display: flex; align-items: center; gap: 6px; }
         .legend-box { width: 14px; height: 14px; border-radius: 3px; }
@@ -427,7 +481,7 @@
             top: 8px;
             bottom: 8px;
             width: 2px;
-            background: #EAE7DC;
+            background: var(--color-line);
         }
         .roadmap-node {
             position: relative;
@@ -456,6 +510,9 @@
             color: var(--color-point);
             margin-bottom: 6px;
         }
+        .roadmap-card p {
+            color: var(--color-text-muted);
+        }
 
         /* --- Inside Out Log --- */
         .log-layout {
@@ -471,6 +528,7 @@
             background-size: cover;
             background-position: center;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            filter: var(--img-filter);
         }
         .log-grid {
             display: grid;
@@ -500,13 +558,13 @@
         }
         .log-card p {
             font-size: 0.95rem;
-            color: #555;
+            color: var(--color-text-muted);
             margin-bottom: 16px;
         }
         .log-badge {
             display: inline-block;
             padding: 4px 8px;
-            background: #F4F1DE;
+            background: var(--color-card-sub-bg);
             border-radius: 4px;
             font-size: 0.8rem;
             color: var(--color-point);
@@ -532,8 +590,9 @@
             background-image: url('https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&q=80&w=1000');
             background-size: cover;
             background-position: center;
-            opacity: 0.08;
+            opacity: var(--bg-opacity);
             pointer-events: none;
+            transition: opacity 0.3s;
         }
         .summary-item {
             position: relative;
@@ -541,7 +600,7 @@
         }
         .summary-item h4 {
             font-size: 0.95rem;
-            color: #EAE7DC;
+            color: rgba(255, 255, 255, 0.8);
             margin-bottom: 8px;
             font-weight: 400;
         }
@@ -549,12 +608,13 @@
             font-family: var(--font-title);
             font-size: 2.5rem;
             font-weight: 700;
+            color: #ffffff;
         }
 
         /* --- CTA Section --- */
         .cta-section {
             text-align: center;
-            background: linear-gradient(to top, rgba(224, 122, 95, 0.08), transparent);
+            background: var(--cta-gradient);
             padding: 100px 0;
         }
         .cta-section h2 {
@@ -566,7 +626,7 @@
         }
         .cta-section p {
             margin-bottom: 32px;
-            color: #666;
+            color: var(--color-text-muted);
             word-break: keep-all;
         }
         
@@ -593,17 +653,17 @@
 
         /* --- Footer --- */
         footer {
-            background: #EAE7DC;
+            background: var(--color-footer-bg);
             padding: 40px 0;
             text-align: center;
             font-size: 0.9rem;
-            color: #777;
+            color: var(--color-text-muted);
         }
         .footer-links {
             margin-top: 12px;
             display: flex;
             justify-content: center;
-            flex-wrap: wrap; /* 하단 링크 모바일 다중열 줄바꿈 안전장치 */
+            flex-wrap: wrap;
             gap: 4px 0;
         }
         .footer-links a {
@@ -612,55 +672,61 @@
             font-weight: 500;
         }
 
-        /* ==========================================================================
-           [모바일 및 태블릿 미디어 쿼리 브레이크포인트]
-           기존 데스크톱 감성을 유지하되, 스마트폰 및 터치 환경 스펙에 완벽 맞춤 대응합니다.
-           ========================================================================== */
+        /* --- Responsive Styles --- */
         @media (max-width: 768px) {
-            /* 1. 타이포그래피 및 섹션 여백 전면 최적화 */
+            .theme-toggle-btn { top: 12px; right: 16px; }
             .hero h1 { font-size: 2.3rem; }
             .hero p.tagline { font-size: 1.15rem; margin-bottom: 24px; }
             .section-title { font-size: 1.8rem; }
             .section-desc { margin-bottom: 28px; font-size: 0.95rem; }
             section { padding: 60px 0; }
 
-            /* 2. 대시보드 및 입력창 모바일 가로 100% 확장 */
             .goal-dashboard { padding: 20px; }
             .goal-header { flex-direction: column; align-items: flex-start; }
             .goal-header .btn { width: 100%; text-align: center; margin-top: 4px; }
             .goal-form-inputs { grid-template-columns: 1fr; gap: 10px; }
             .goal-form-inputs .btn { width: 100%; text-align: center; }
 
-            /* 3. Inside Out 로그 레이아웃을 반응형 1열로 변환 */
             .log-layout { grid-template-columns: 1fr; gap: 24px; }
             .log-side-img { min-height: 200px; max-height: 260px; }
             .log-card { padding: 20px; }
 
-            /* 4. 요약 박스 모바일 배치 최적화 */
             .summary-box { grid-template-columns: 1fr; gap: 24px; padding: 30px 20px; }
             .summary-item .num { font-size: 2.1rem; }
 
-            /* 5. 하단 CTA 작성 폼 전체 너비 채우기 */
             .cta-section { padding: 60px 0; }
             .cta-section .btn { width: 100%; text-align: center; }
             .record-form-wrap { padding: 20px; margin: 30px 0 0 0; }
         }
 
-        /* 360px 이하의 초소형 디바이스 안전 브레이크포인트 */
         @media (max-width: 380px) {
             .hero h1 { font-size: 1.9rem; }
-            .container { padding: 0 16px; } /* 외부 여백을 소폭 줄여 본문 영역 확대 */
+            .container { padding: 0 16px; }
             .calendar-grid { 
                 grid-template-columns: repeat(auto-fill, minmax(26px, 1fr)); 
                 padding: 12px; 
                 gap: 6px;
             }
-            .focus-grid { grid-template-columns: 1fr; } /* 투데이 포커스 완벽한 1열 정렬 */
+            .focus-grid { grid-template-columns: 1fr; }
             .traffic-lights { gap: 12px; }
         }
     </style>
+    <script>
+        /* 초기 테마 적용 스크립트: 페이지 깜빡임 현상을 막기 위해 head에 바로 선언 */
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            } else {
+                const userPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                document.documentElement.setAttribute('data-theme', userPrefersDark ? 'dark' : 'light');
+            }
+        })();
+    </script>
 </head>
 <body>
+
+    <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" aria-label="테마 전환 버튼">🌓</button>
 
     <section class="hero visible">
         <div class="container">
@@ -686,8 +752,7 @@
                     </div>
                 </div>
 
-                <div class="goal-grid" id="goalGrid">
-                    </div>
+                <div class="goal-grid" id="goalGrid"></div>
             </div>
         </div>
     </section>
@@ -728,8 +793,7 @@
             <h2 class="section-title">성장 캘린더</h2>
             <p class="section-desc">최근 30일간 쌓아 올린 신호등 흔적들입니다. 러닝메이트들과 동력을 나누는 시각적 지표입니다.</p>
             
-            <div class="calendar-grid" id="calendarGrid">
-                </div>
+            <div class="calendar-grid" id="calendarGrid"></div>
             
             <div class="calendar-legend">
                 <div class="legend-item"><div class="legend-box day-green"></div> 만족</div>
@@ -842,7 +906,7 @@
     <footer>
         <div class="container">
             <p>© 2026. 나의 성장 아카이브. All rights reserved.</p>
-            <p style="font-size: 0.8rem; margin-top: 4px; color:#999;">함께 달리는 러닝메이트 동료들의 방문을 환영합니다.</p>
+            <p style="font-size: 0.8rem; margin-top: 4px; color: var(--color-text-muted);">함께 달리는 러닝메이트 동료들의 방문을 환영합니다.</p>
             <div class="footer-links">
                 <a href="#todays-focus">Focus</a>
                 <a href="#calendar">Calendar</a>
@@ -860,6 +924,27 @@
             { id: 3, name: "사이드 프로젝트 프로토타이핑", current: 2, target: 5 }
         ];
 
+        // 다크모드/라이트모드 토글 스크립트
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const targetTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            document.documentElement.setAttribute('data-theme', targetTheme);
+            localStorage.setItem('theme', targetTheme);
+            updateToggleButtonText(targetTheme);
+        }
+
+        function updateToggleButtonText(theme) {
+            const btn = document.getElementById('themeToggleBtn');
+            if(theme === 'dark') {
+                btn.textContent = '☀️';
+                btn.setAttribute('title', '라이트 모드로 변경');
+            } else {
+                btn.textContent = '🌙';
+                btn.setAttribute('title', '다크 모드로 변경');
+            }
+        }
+
         // 1. 목표 대시보드 렌더링 엔진
         function renderGoals() {
             const grid = document.getElementById('goalGrid');
@@ -876,7 +961,7 @@
                         <span>${goal.name}</span>
                         <span style="color: var(--color-point); white-space: nowrap;">${goal.current} / ${goal.target}</span>
                     </div>
-                    <div style="font-size:0.85rem; color:#888;">달성률: ${percentage}%</div>
+                    <div style="font-size:0.85rem; color: var(--color-text-muted);">달성률: ${percentage}%</div>
                     <div class="progress-bar-bg">
                         <div class="progress-bar-fill" style="width: ${percentage}%"></div>
                     </div>
@@ -944,6 +1029,7 @@
         // 3. 최근 30일 성장 캘린더 생성기
         function generateCalendar() {
             const calendarGrid = document.getElementById('calendarGrid');
+            calendarGrid.innerHTML = ''; // 중복 생성 방지 리셋
             const states = ['day-green', 'day-yellow', 'day-red', '']; 
             
             for(let i = 1; i <= 30; i++) {
@@ -1029,6 +1115,10 @@
             renderGoals();
             generateCalendar();
             initScrollAnimation();
+            
+            // 현재 활성화된 테마 상태에 맞춰 토글 버튼 아이콘 동기화
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            updateToggleButtonText(currentTheme);
         });
     </script>
 </body>
