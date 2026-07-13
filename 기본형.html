@@ -273,6 +273,24 @@
         .goal-progress-wrap { margin-top: 4px; }
         .goal-progress-text { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
 
+
+        /* 목표 진행률 막대 */
+        .progress-bar-bg {
+            width: 100%;
+            height: 8px;
+            background-color: var(--color-line);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            width: 0;
+            height: 100%;
+            background-color: var(--color-point);
+            border-radius: 999px;
+            transition: width 0.4s ease;
+        }
+
         /* 상단 액션 컨트롤 버튼들 */
         .goal-card-controls { position: absolute; top: 16px; right: 16px; display: flex; gap: 6px; }
         .goal-ctrl-btn { background: none; border: none; color: var(--color-text-muted); cursor: pointer; font-size: 0.9rem; padding: 2px; }
