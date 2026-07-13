@@ -735,23 +735,32 @@
             return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
         }
 
-        // 오늘 날짜 상숫값 바인딩 (13일 고정)
-        const TODAY_DAY = 13;
-        const TODAY_FULL_DATE = new Date("2026-07-13");
+        // 고정 변수를 제거하고 브라우저 실제 날짜 객체 연동 (실시간 계산)
+        function getTodayInfo() {
+            const now = new Date();
+            return {
+                dayNum: now.getDate(), // 1 ~ 31 사이의 오늘 일자
+                fullDateStr: now.toISOString().split('T')[0] // 'YYYY-MM-DD' 포맷 생성
+            };
+        }
 
         let G_State = { goals: [], calendar: {}, guestbook: [], logs: [] };
-        
-        // 추가/수정용 폼 임시 체크포인트 배열
         let tempCheckpoints = [];
 
         function loadStorage() {
             try {
+                const todayInfo = getTodayInfo();
+
+                // 기본 테스트용 기한도 오늘 기준으로 유동적 계산되도록 보완
+                const dplus30 = new Date(); dplus30.setDate(dplus30.getDate() + 30);
+                const dplus7 = new Date(); dplus7.setDate(dplus7.getDate() + 7);
+
                 G_State.goals = JSON.parse(localStorage.getItem('archive_goals_v2')) || [
                     { 
                         id: 1, 
                         title: '알고리즘 코테 마스터', 
                         category: '개발', 
-                        deadline: '2026-08-15', 
+                        deadline: dplus30.toISOString().split('T')[0], 
                         nextAction: '매일 아침 프로그래머스 2문제 풀이',
                         status: 'active',
                         checkpoints: [
@@ -765,7 +774,7 @@
                         id: 2,
                         title: '독서 스터디 (딥 워크)',
                         category: '독서',
-                        deadline: '2026-07-20',
+                        deadline: dplus7.toISOString().split('T')[0],
                         nextAction: '3장 내용 요약 및 서평 초안 작성',
                         status: 'paused',
                         checkpoints: [],
@@ -774,14 +783,14 @@
                 ];
                 G_State.calendar = JSON.parse(localStorage.getItem('archive_calendar')) || {};
                 G_State.guestbook = JSON.parse(localStorage.getItem('archive_guestbook')) || [
-                    { id: 1, nickname: '코드러너', msg: '함께 끝까지 완주해봐요! 멋진 공간이네요.', date: '13일' }
+                    { id: 1, nickname: '코드러너', msg: '함께 끝까지 완주해봐요! 멋진 공간이네요.', date: `${todayInfo.dayNum}일` }
                 ];
                 G_State.logs = JSON.parse(localStorage.getItem('archive_logs')) || [
-                    { id: 1, date: '2026-07-12', title: '바닐라 자바스크립트로 파티클 엔진 고도화', content: '브라우저 렌더링 파이프라인 최적화를 진행했다. RequestAnimationFrame 구조를 정합성 있게 변경하여 프레임 드랍 현상을 극적으로 개선 완료함.', tag: '개발 및 연구' }
+                    { id: 1, date: todayInfo.fullDateStr, title: '바닐라 자바스크립트로 파티클 엔진 고도화', content: '브라우저 렌더링 파이프라인 최적화를 진행했다. RequestAnimationFrame 구조를 정합성 있게 변경하여 프레임 드랍 현상을 극적으로 개선 완료함.', tag: '개발 및 연구' }
                 ];
 
-                if (!G_State.calendar[TODAY_DAY]) {
-                    G_State.calendar[TODAY_DAY] = { status: 'none', targetHours: 0, actualHours: 0, percent: 0, oneLine: '' };
+                if (!G_State.calendar[todayInfo.dayNum]) {
+                    G_State.calendar[todayInfo.dayNum] = { status: 'none', targetHours: 0, actualHours: 0, percent: 0, oneLine: '' };
                 }
             } catch (e) {
                 initDefaultStorage();
@@ -789,9 +798,10 @@
         }
 
         function initDefaultStorage() {
+            const todayInfo = getTodayInfo();
             G_State.goals = [];
             G_State.calendar = {};
-            G_State.calendar[TODAY_DAY] = { status: 'none', targetHours: 0, actualHours: 0, percent: 0, oneLine: '' };
+            G_State.calendar[todayInfo.dayNum] = { status: 'none', targetHours: 0, actualHours: 0, percent: 0, oneLine: '' };
             G_State.guestbook = [];
             G_State.logs = [];
             saveAllToStorage();
@@ -836,14 +846,15 @@
             document.getElementById('editPercentCalc').value = (tgt > 0 ? Math.min(100, Math.round((act / tgt) * 100)) : 0) + "%";
         }
 
-        /* --- 개편된 목표 핸들러 시스템 (CRUD + 정렬) --- */
+        /* --- 목표 핸들러 시스템 --- */
         function openNewGoalForm() {
+            const todayInfo = getTodayInfo();
             const f = document.getElementById('goalFormContainer');
             document.getElementById('formTitle').innerText = "✨ 새 목표 추가";
             document.getElementById('formGoalId').value = "";
             document.getElementById('goalName').value = "";
             document.getElementById('goalCategory').value = "";
-            document.getElementById('goalDeadline').value = "2026-07-13";
+            document.getElementById('goalDeadline').value = todayInfo.fullDateStr; // 마감일 기본값을 오늘 날짜로 세팅
             document.getElementById('goalStatus').value = "active";
             document.getElementById('goalNextAction').value = "";
             document.getElementById('goalManualProgress').value = "";
@@ -915,7 +926,6 @@
             if (!title) { showToast("목표 이름을 명시해주세요."); return; }
 
             if (id) {
-                // 수정 모드
                 const gIdx = G_State.goals.findIndex(g => g.id == id);
                 if (gIdx !== -1) {
                     G_State.goals[gIdx] = { 
@@ -926,7 +936,6 @@
                     showToast("목표 마일스톤이 성공적으로 수정되었습니다.");
                 }
             } else {
-                // 신규 생성
                 G_State.goals.push({
                     id: Date.now(),
                     title, category, deadline, status, nextAction, manualProgress,
@@ -964,7 +973,6 @@
             const targetIdx = idx + direction;
             if (targetIdx < 0 || targetIdx >= G_State.goals.length) return;
 
-            // 스왑 정렬 구현
             const temp = G_State.goals[idx];
             G_State.goals[idx] = G_State.goals[targetIdx];
             G_State.goals[targetIdx] = temp;
@@ -973,11 +981,15 @@
             renderGoals();
         }
 
+        // 오늘 날짜 객체 기준으로 D-Day 차이를 정밀하게 자동 계산
         function parseDDay(deadlineStr) {
             if (!deadlineStr) return { text: 'D-Day 미설정', clazz: '' };
+            
             const dDate = new Date(deadlineStr);
             dDate.setHours(0,0,0,0);
-            const tDate = new Date(TODAY_FULL_DATE);
+            
+            // 접속한 오늘 날짜 기준 정렬
+            const tDate = new Date();
             tDate.setHours(0,0,0,0);
 
             const diffTime = dDate.getTime() - tDate.getTime();
@@ -1007,7 +1019,6 @@
                 let pct = 0;
                 let chkListHtml = '';
 
-                // 체크포인트 유무에 따른 동적 백분율 연산
                 if (g.checkpoints && g.checkpoints.length > 0) {
                     const completedCount = g.checkpoints.filter(c => c.checked).length;
                     pct = Math.min(100, Math.round((completedCount / g.checkpoints.length) * 100));
@@ -1079,11 +1090,12 @@
 
         /* --- Today's Focus 기능부 --- */
         function toggleFocusEditForm() {
+            const todayInfo = getTodayInfo();
             const wrap = document.getElementById('focusEditFormWrap');
             if (wrap.style.display === 'block') { wrap.style.display = 'none'; }
             else {
                 wrap.style.display = 'block';
-                const d = G_State.calendar[TODAY_DAY] || { status: 'none', targetHours: 0, actualHours: 0, percent: 0, oneLine: '' };
+                const d = G_State.calendar[todayInfo.dayNum] || { status: 'none', targetHours: 0, actualHours: 0, percent: 0, oneLine: '' };
                 document.getElementById('editLightSelect').value = d.status;
                 document.getElementById('editTargetHoursInput').value = d.targetHours || '';
                 document.getElementById('editHoursInput').value = d.actualHours || '';
@@ -1094,17 +1106,23 @@
         }
 
         function setDashboardLight(color) {
-            if(!G_State.calendar[TODAY_DAY]) G_State.calendar[TODAY_DAY] = { status: 'none', targetHours: 0, actualHours: 0, percent: 0, oneLine: '' };
-            G_State.calendar[TODAY_DAY].status = color;
+            const todayInfo = getTodayInfo();
+            if(!G_State.calendar[todayInfo.dayNum]) G_State.calendar[todayInfo.dayNum] = { status: 'none', targetHours: 0, actualHours: 0, percent: 0, oneLine: '' };
+            G_State.calendar[todayInfo.dayNum].status = color;
             saveAllToStorage(); syncStateToUI(); renderCalendar(); calculateWeeklyStats();
             showToast(`오늘의 신호등이 [${getLightName(color)}] 상태로 변경되었습니다.`);
         }
 
-        function syncLightSelectToDashboard(val) { G_State.calendar[TODAY_DAY].status = val; }
+        function syncLightSelectToDashboard(val) { 
+            const todayInfo = getTodayInfo();
+            if(!G_State.calendar[todayInfo.dayNum]) G_State.calendar[todayInfo.dayNum] = { status: 'none', targetHours: 0, actualHours: 0, percent: 0, oneLine: '' };
+            G_State.calendar[todayInfo.dayNum].status = val; 
+        }
         function getLightName(c) { return c === 'green' ? '만족' : c === 'yellow' ? '보통' : c === 'red' ? '아쉬움' : '미기록'; }
 
         function syncStateToUI() {
-            const d = G_State.calendar[TODAY_DAY] || { status: 'none', targetHours: 0, actualHours: 0, percent: 0, oneLine: '' };
+            const todayInfo = getTodayInfo();
+            const d = G_State.calendar[todayInfo.dayNum] || { status: 'none', targetHours: 0, actualHours: 0, percent: 0, oneLine: '' };
             document.querySelectorAll('#dashboardLights .light').forEach(l => l.classList.remove('active'));
             const targetLight = document.querySelector(`#dashboardLights .light.${d.status}`);
             if (targetLight) targetLight.classList.add('active');
@@ -1116,25 +1134,27 @@
         }
 
         function saveTodayFocus() {
+            const todayInfo = getTodayInfo();
             const status = document.getElementById('editLightSelect').value;
             const tgt = parseFloat(document.getElementById('editTargetHoursInput').value) || 0;
             const act = parseFloat(document.getElementById('editHoursInput').value) || 0;
             const oneLine = document.getElementById('editOneLineInput').value.trim();
             const pct = tgt > 0 ? Math.min(100, Math.round((act / tgt) * 100)) : 0;
 
-            G_State.calendar[TODAY_DAY] = { status, targetHours: tgt, actualHours: act, percent: pct, oneLine };
+            G_State.calendar[todayInfo.dayNum] = { status, targetHours: tgt, actualHours: act, percent: pct, oneLine };
             saveAllToStorage(); syncStateToUI(); renderCalendar(); calculateWeeklyStats(); toggleFocusEditForm();
             showToast("오늘의 포커스 집중 지표가 저장되었습니다.");
         }
 
         /* --- 캘린더 핵심 엔진 --- */
         function renderCalendar() {
+            const todayInfo = getTodayInfo();
             const grid = document.getElementById('calendarGrid');
             grid.innerHTML = '';
 
             for (let day = 1; day <= 31; day++) {
                 const dData = G_State.calendar[day] || { status: 'none', targetHours: 0, actualHours: 0, percent: 0, oneLine: '' };
-                const isToday = (day === TODAY_DAY);
+                const isToday = (day === todayInfo.dayNum);
 
                 const tooltipText = `${day}일 지표\n상태: ${getLightName(dData.status)}\n목표: ${dData.targetHours || 0}h / 실제: ${dData.actualHours || 0}h\n달성률: ${dData.percent || 0}%\n기록: ${dData.oneLine || '기록 없음'}`;
 
@@ -1167,6 +1187,7 @@
         function closeDateModal() { document.getElementById('dateModalOverlay').classList.remove('active'); }
 
         function saveDateModalData() {
+            const todayInfo = getTodayInfo();
             const status = document.getElementById('modalLightSelect').value;
             const tgt = parseFloat(document.getElementById('modalTargetHours').value) || 0;
             const act = parseFloat(document.getElementById('modalActualHours').value) || 0;
@@ -1175,7 +1196,7 @@
 
             G_State.calendar[selectedModalDay] = { status, targetHours: tgt, actualHours: act, percent: pct, oneLine };
             saveAllToStorage(); 
-            if (selectedModalDay === TODAY_DAY) syncStateToUI();
+            if (selectedModalDay === todayInfo.dayNum) syncStateToUI();
             renderCalendar(); calculateWeeklyStats(); closeDateModal();
             showToast(`${selectedModalDay}일 데이터가 수정 반영되었습니다.`);
         }
@@ -1258,15 +1279,17 @@
 
         /* --- 데이터 리셋 허브 --- */
         function resetTodayFocus() {
+            const todayInfo = getTodayInfo();
             if (confirm("오늘 대시보드 Focus 수치를 초기화하시겠습니까?")) {
-                G_State.calendar[TODAY_DAY] = { status: 'none', targetHours: 0, actualHours: 0, percent: 0, oneLine: '' };
+                G_State.calendar[todayInfo.dayNum] = { status: 'none', targetHours: 0, actualHours: 0, percent: 0, oneLine: '' };
                 saveAllToStorage(); syncStateToUI(); renderCalendar(); calculateWeeklyStats();
                 showToast("오늘의 데이터가 초기화되었습니다.");
             }
         }
         function resetCalendarOnly() {
+            const todayInfo = getTodayInfo();
             if (confirm("1~31일 캘린더에 기록된 모든 셀 데이터를 완전히 비우시겠습니까?")) {
-                G_State.calendar = {}; G_State.calendar[TODAY_DAY] = { status: 'none', targetHours: 0, actualHours: 0, percent: 0, oneLine: '' };
+                G_State.calendar = {}; G_State.calendar[todayInfo.dayNum] = { status: 'none', targetHours: 0, actualHours: 0, percent: 0, oneLine: '' };
                 saveAllToStorage(); syncStateToUI(); renderCalendar(); calculateWeeklyStats();
                 showToast("캘린더 데이터 시트가 청소되었습니다.");
             }
@@ -1294,6 +1317,7 @@
             const reader = new FileReader();
             reader.onload = function(evt) {
                 try {
+                    const todayInfo = getTodayInfo();
                     const imported = JSON.parse(evt.target.result);
                     if (!imported.calendar || !imported.guestbook || !imported.logs) { alert("올바르지 않은 백업 양식입니다."); return; }
                     if (confirm("기존 내역을 지우고 이 백업 본으로 전면 복원하시겠습니까?")) {
@@ -1302,7 +1326,7 @@
                         G_State.guestbook = imported.guestbook; 
                         G_State.logs = imported.logs;
                         if(imported.theme) { document.documentElement.setAttribute('data-theme', imported.theme); localStorage.setItem('theme', imported.theme); }
-                        if (!G_State.calendar[TODAY_DAY]) { G_State.calendar[TODAY_DAY] = { status: 'none', targetHours: 0, actualHours: 0, percent: 0, oneLine: '' }; }
+                        if (!G_State.calendar[todayInfo.dayNum]) { G_State.calendar[todayInfo.dayNum] = { status: 'none', targetHours: 0, actualHours: 0, percent: 0, oneLine: '' }; }
                         saveAllToStorage(); syncStateToUI(); renderGoals(); renderCalendar(); calculateWeeklyStats(); renderGrowthLogs(); renderGuestbook();
                         showToast("통합 기록 복원이 완료되었습니다.");
                     }
@@ -1325,10 +1349,11 @@
             });
         }
         function addGuestbookMsg() {
+            const todayInfo = getTodayInfo();
             const nick = document.getElementById('gbNickname').value.trim();
             const msg = document.getElementById('gbMessage').value.trim();
             if (!nick || !msg) { showToast("닉네임과 내용을 입력하세요."); return; }
-            G_State.guestbook.unshift({ id: Date.now(), nickname: nick, msg: msg, date: "13일" });
+            G_State.guestbook.unshift({ id: Date.now(), nickname: nick, msg: msg, date: `${todayInfo.dayNum}일` });
             saveAllToStorage(); renderGuestbook();
             document.getElementById('gbNickname').value = ''; document.getElementById('gbMessage').value = '';
             updateCharCount('gbMessage', 'gbCharCounter', 100);
@@ -1355,8 +1380,10 @@
             return { init, resize };
         })();
 
-        // 어플리케이션 도큐먼트 부트스트랩
+        // 어플리케이션 도큐먼트 부트스트랩 단계
         window.addEventListener('DOMContentLoaded', () => {
+            const todayInfo = getTodayInfo();
+
             loadStorage();
             renderGoals();
             syncStateToUI();
@@ -1365,7 +1392,8 @@
             renderGrowthLogs();
             renderGuestbook();
             
-            document.getElementById('logInputDate').value = "2026-07-13";
+            // 일지 입력란의 기본값도 고정이 아닌 내일, 모레 언제 접속해도 '오늘'의 실시간 정보로 바인딩
+            document.getElementById('logInputDate').value = todayInfo.fullDateStr;
 
             ParticleEngine.init();
             handleScrollInteractions();
