@@ -92,6 +92,13 @@
             to { opacity: 1; }
         }
 
+        @keyframes toastFadeInOut {
+            0% { opacity: 0; transform: translate(-50%, 20px); }
+            15% { opacity: 1; transform: translate(-50%, 0); }
+            85% { opacity: 1; transform: translate(-50%, 0); }
+            100% { opacity: 0; transform: translate(-50%, -20px); }
+        }
+
         /* --- Base Styles --- */
         * {
             box-sizing: border-box;
@@ -165,7 +172,7 @@
             margin-bottom: 40px;
         }
 
-        /* --- [추가] 배경 장식용 애니메이션 레이어 --- */
+        /* --- 배경 장식용 애니메이션 레이어 --- */
         #particle-canvas {
             position: fixed;
             top: 0;
@@ -637,6 +644,124 @@
             color: var(--color-point);
         }
 
+        /* --- [신규 추가] 러닝메이트 방명록 섹션 스타일 --- */
+        .guestbook-layout {
+            display: grid;
+            grid-template-columns: 1fr 1.8fr;
+            gap: 32px;
+            align-items: start;
+        }
+        .guestbook-form-card {
+            background: var(--color-card-bg);
+            padding: 28px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            border-top: 3px solid var(--color-main);
+        }
+        .guestbook-form-card h3 {
+            font-family: var(--font-title);
+            color: var(--color-point);
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+        .char-counter {
+            text-align: right;
+            font-size: 0.8rem;
+            color: var(--color-text-muted);
+            margin-top: 4px;
+        }
+        .guestbook-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+        /* 스크롤바 디자인 맞춤 */
+        .guestbook-list::-webkit-scrollbar { width: 6px; }
+        .guestbook-list::-webkit-scrollbar-track { background: transparent; }
+        .guestbook-list::-webkit-scrollbar-thumb { background: var(--color-line); border-radius: 3px; }
+        
+        .guestbook-item {
+            background: var(--color-card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            border-left: 4px solid var(--color-point);
+            position: relative;
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        .guestbook-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-right: 24px;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .guestbook-nickname {
+            font-weight: 700;
+            color: var(--color-point);
+            font-size: 0.95rem;
+        }
+        .guestbook-date {
+            font-size: 0.8rem;
+            color: var(--color-text-muted);
+        }
+        .guestbook-msg {
+            font-size: 0.95rem;
+            color: var(--color-text);
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .guestbook-del-btn {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            background: none;
+            border: none;
+            color: var(--color-text-muted);
+            cursor: pointer;
+            font-size: 0.9rem;
+            opacity: 0.5;
+            padding: 2px;
+            transition: opacity 0.2s, color 0.2s;
+        }
+        .guestbook-del-btn:hover { opacity: 1; color: var(--color-main); }
+        
+        .guestbook-empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--color-text-muted);
+            font-style: italic;
+            background: var(--color-card-bg);
+            border-radius: 12px;
+            border: 1px dashed var(--color-input-border);
+        }
+
+        /* --- [신규 추가] 토스트 알림 메커니즘 --- */
+        #toast-container {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2000;
+            pointer-events: none;
+        }
+        .toast {
+            background: var(--color-point);
+            color: #ffffff;
+            padding: 12px 24px;
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            font-size: 0.9rem;
+            font-weight: 500;
+            animation: toastFadeInOut 2.3s ease forwards;
+            white-space: nowrap;
+        }
+
         /* --- Weekly Summary --- */
         .summary-box {
             background: var(--color-point);
@@ -749,6 +874,9 @@
             .parallax-bg-blur {
                 display: none !important;
             }
+            .toast {
+                animation: fadeIn 0.3s ease forwards;
+            }
         }
 
         /* --- Responsive Styles --- */
@@ -769,6 +897,10 @@
             .log-layout { grid-template-columns: 1fr; gap: 24px; }
             .log-side-img { min-height: 200px; max-height: 260px; }
             .log-card { padding: 20px; }
+
+            /* 방명록 모바일 반응형 대응 디자인 */
+            .guestbook-layout { grid-template-columns: 1fr; gap: 24px; }
+            .guestbook-form-card { padding: 20px; }
 
             .summary-box { grid-template-columns: 1fr; gap: 24px; padding: 30px 20px; }
             .summary-item .num { font-size: 2.1rem; }
@@ -812,6 +944,8 @@
     <canvas id="particle-canvas"></canvas>
     <div class="parallax-bg-blur" id="bg-blur-1"></div>
     <div class="parallax-bg-blur" id="bg-blur-2"></div>
+
+    <div id="toast-container"></div>
 
     <div class="scroll-progress-container">
         <div class="scroll-progress-bar" id="scrollProgressBar"></div>
@@ -947,6 +1081,32 @@
         </div>
     </section>
 
+    <section id="guestbook">
+        <div class="container">
+            <h2 class="section-title">러닝메이트 방명록</h2>
+            <p class="section-desc">함께 성장해 나가는 동료들의 한마디와 따뜻한 응원을 나누는 공간입니다.</p>
+            
+            <div class="guestbook-layout">
+                <div class="guestbook-form-card">
+                    <h3>✍️ 메시지 남기기</h3>
+                    <div class="form-group">
+                        <label for="gbNickname">닉네임</label>
+                        <input type="text" id="gbNickname" class="input-field" placeholder="닉네임을 입력하세요.">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label for="gbMessage">응원 메시지</label>
+                        <textarea id="gbMessage" class="input-field" rows="3" placeholder="따뜻한 한마디를 나누어 주세요." oninput="updateCharCount(this)"></textarea>
+                        <div class="char-counter"><span id="currentCharCount">0</span> / 150자</div>
+                    </div>
+                    <button class="btn" style="width: 100%;" onclick="addGuestbookMsg()">메시지 남기기</button>
+                </div>
+
+                <div class="guestbook-list" id="guestbookList">
+                    </div>
+            </div>
+        </div>
+    </section>
+
     <section id="summary">
         <div class="container">
             <h2 class="section-title">주간 성장 요약</h2>
@@ -1003,6 +1163,7 @@
                 <a href="#calendar">Calendar</a>
                 <a href="#roadmap">Roadmap</a>
                 <a href="#logs">Log</a>
+                <a href="#guestbook">Guestbook</a>
             </div>
         </div>
     </footer>
@@ -1227,7 +1388,137 @@
             document.getElementById('logs').scrollIntoView({ behavior: 'smooth' });
         }
 
-        // --- [추가] 6. 은은한 배경 파티클 애니메이션 엔진 ---
+
+        // --- [신규 추가] 6. 러닝메이트 방명록 비즈니스 로직 모듈 ---
+        const MAX_GB_CHARS = 150;
+
+        // XSS 공격 방어용 이스케이프 유틸리티 함수
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // 컴팩트 토스트 알림 생성기
+        function showToast(message) {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            
+            container.appendChild(toast);
+            
+            // 애니메이션 사이클 종료(2.3초) 후 요소 파괴 제거
+            setTimeout(() => {
+                toast.remove();
+            }, 2300);
+        }
+
+        // 글자 수 실시간 계측 카운터
+        function updateCharCount(textarea) {
+            if(textarea.value.length > MAX_GB_CHARS) {
+                textarea.value = textarea.value.substring(0, MAX_GB_CHARS);
+            }
+            document.getElementById('currentCharCount').textContent = textarea.value.length;
+        }
+
+        // 방명록 로드 및 렌더링 파이프라인
+        function renderGuestbook() {
+            const listContainer = document.getElementById('guestbookList');
+            if(!listContainer) return;
+
+            const savedData = localStorage.getItem('growth_archive_gb');
+            const messages = savedData ? JSON.parse(savedData) : [];
+
+            listContainer.innerHTML = '';
+
+            if (messages.length === 0) {
+                listContainer.innerHTML = `<div class="guestbook-empty">아직 남겨진 메시지가 없습니다. 첫 발자국을 남겨보세요!</div>`;
+                return;
+            }
+
+            // 스토리지에 담긴 리스트 최신 등록일 기준 내림차순 정렬 처리
+            messages.sort((a, b) => b.id - a.id);
+
+            messages.forEach(msg => {
+                const item = document.createElement('div');
+                item.className = 'guestbook-item';
+                item.innerHTML = `
+                    <button class="guestbook-del-btn" onclick="deleteGuestbookMsg(${msg.id})" title="메시지 삭제">✕</button>
+                    <div class="guestbook-meta">
+                        <span class="guestbook-nickname">${escapeHtml(msg.nickname)}</span>
+                        <span class="guestbook-date">${msg.date}</span>
+                    </div>
+                    <div class="guestbook-msg">${escapeHtml(msg.message)}</div>
+                `;
+                listContainer.appendChild(item);
+            });
+        }
+
+        // 방명록 메시지 추가 처리 핸들러
+        function addGuestbookMsg() {
+            const nickInput = document.getElementById('gbNickname');
+            const msgInput = document.getElementById('gbMessage');
+
+            const nickname = nickInput.value.trim();
+            const message = msgInput.value.trim();
+
+            if (!nickname || !message) {
+                showToast("⚠️ 닉네임과 응원 메시지를 모두 작성해 주세요.");
+                return;
+            }
+
+            const savedData = localStorage.getItem('growth_archive_gb');
+            const messages = savedData ? JSON.parse(savedData) : [];
+
+            const now = new Date();
+            const dateString = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+            const newEntry = {
+                id: Date.now(),
+                nickname: nickname,
+                message: message,
+                date: dateString
+            };
+
+            messages.push(newEntry);
+            localStorage.setItem('growth_archive_gb', JSON.stringify(messages));
+
+            // 입력 폼 제어 리셋
+            nickInput.value = '';
+            msgInput.value = '';
+            document.getElementById('currentCharCount').textContent = '0';
+
+            renderGuestbook();
+            showToast("✨ 메시지가 방명록에 등록되었습니다!");
+        }
+
+        // 방명록 삭제 핸들러
+        function deleteGuestbookMsg(id) {
+            if (!confirm("정말로 이 응원 메시지를 삭제하시겠습니까?")) {
+                return;
+            }
+
+            const savedData = localStorage.getItem('growth_archive_gb');
+            if (!savedData) return;
+
+            let messages = JSON.parse(savedData);
+            messages = messages.filter(msg => msg.id !== id);
+
+            localStorage.setItem('growth_archive_gb', JSON.stringify(messages));
+            
+            renderGuestbook();
+            showToast("🗑️ 메시지가 안전하게 삭제되었습니다.");
+        }
+
+
+        // --- [추가] 7. 은은한 배경 파티클 애니메이션 엔진 ---
         const ParticleEngine = (function() {
             const canvas = document.getElementById('particle-canvas');
             let ctx = null;
@@ -1328,6 +1619,7 @@
             renderGoals();
             generateCalendar();
             initScrollAnimation();
+            renderGuestbook(); // [신규 추가] 렌더러 파이프라인 트리거 실행
             
             // 초기 테마 상태 맞춤형 버튼 동기화
             const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
